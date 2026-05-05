@@ -14,13 +14,13 @@ public class MongoProfileInitializer : IDbInitializer
 
         var uniqueIdentity = new CreateIndexModel<Profile>(
             Builders<Profile>.IndexKeys
-                .Ascending(p => p.Name)
                 .Ascending(p => p.PhoneNumber),
             new CreateIndexOptions { Unique = true }
         );
 
         var filterIndex = new CreateIndexModel<Profile>(
             Builders<Profile>.IndexKeys
+                .Ascending(p => p.Name)
                 .Ascending(p => p.BirthYear)
                 .Ascending(p => p.Region)
         );

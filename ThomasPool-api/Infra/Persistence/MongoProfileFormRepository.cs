@@ -41,9 +41,9 @@ public class MongoProfileFormRepository : IProfileFormRepository
         throw new Exception($"Duplicated version {form.Version}");
     }
 
-    public async Task<ProfileForm?> GetFormAsync(int version = -1)
+    public async Task<ProfileForm?> GetFormAsync(int? version)
     {
-        if (version > -1) return await _forms.Find(f => f.Version == version).FirstOrDefaultAsync();
+        if (version != null) return await _forms.Find(f => f.Version == version).FirstOrDefaultAsync();
         return await _forms.Find(Builders<ProfileForm>.Filter.Empty)
             .SortByDescending(f => f.Version)
             .Limit(1)

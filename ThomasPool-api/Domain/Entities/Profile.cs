@@ -10,7 +10,7 @@ public class ProfileBase
     [Required, StringLength(100, MinimumLength = 1)]
     public required string Name { get; set; }
 
-    [Required, RegularExpression(@"^\d{10,11}$", ErrorMessage = "PhoneNumber must be 10 or 11 digits.")]
+    [Required, RegularExpression(@"^\d{11}$", ErrorMessage = "PhoneNumber must be 11 digits.")]
     public required string PhoneNumber { get; set; }
 
     [Range(1900, 2100)]
@@ -20,6 +20,15 @@ public class ProfileBase
     public required string Region { get; set; }
 
     protected ProfileBase() {}
+
+    [SetsRequiredMembers]
+    public ProfileBase(string name, string phoneNumber, int birthYear, string region)
+    {
+        Name = name;
+        PhoneNumber = phoneNumber;
+        BirthYear = birthYear;
+        Region = region;
+    }
 
     [SetsRequiredMembers]
     public ProfileBase(ProfileBase other)
@@ -34,15 +43,14 @@ public class ProfileBase
     {
         if (obj is ProfileBase other)
         {
-            return Name == other.Name 
-                && PhoneNumber == other.PhoneNumber;
+            return PhoneNumber == other.PhoneNumber;
         }
         return false;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name, PhoneNumber);
+        return HashCode.Combine(PhoneNumber);
     }
 }
 

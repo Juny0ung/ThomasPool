@@ -17,7 +17,6 @@ public class MongoProfileRepository : IProfileRepository
     }
 
     private static FilterDefinition<Profile> IdentityFilter(ProfileBase p) =>
-        Builders<Profile>.Filter.Eq(x => x.Name, p.Name) &
         Builders<Profile>.Filter.Eq(x => x.PhoneNumber, p.PhoneNumber);
 
     public async Task RegisterAsync(ProfileBase profileBase)
