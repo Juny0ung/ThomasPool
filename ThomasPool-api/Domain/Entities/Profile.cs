@@ -10,6 +10,10 @@ public class ProfileBase
     [Required, StringLength(100, MinimumLength = 1)]
     public required string Name { get; set; }
 
+    // true: male / false: female
+    [Required]
+    public required bool Gender { get; set; }
+
     [Required, RegularExpression(@"^\d{11}$", ErrorMessage = "PhoneNumber must be 11 digits.")]
     public required string PhoneNumber { get; set; }
 
@@ -22,21 +26,13 @@ public class ProfileBase
     protected ProfileBase() {}
 
     [SetsRequiredMembers]
-    public ProfileBase(string name, string phoneNumber, int birthYear, string region)
+    public ProfileBase(string name, bool gender, string phoneNumber, int birthYear, string region)
     {
         Name = name;
+        Gender = gender;
         PhoneNumber = phoneNumber;
         BirthYear = birthYear;
         Region = region;
-    }
-
-    [SetsRequiredMembers]
-    public ProfileBase(ProfileBase other)
-    {
-        Name = other.Name;
-        PhoneNumber = other.PhoneNumber;
-        BirthYear = other.BirthYear;
-        Region = other.Region;
     }
 
     public override bool Equals(object? obj)
@@ -54,17 +50,41 @@ public class ProfileBase
     }
 }
 
+public class MultipleContent : ProfileContent
+{
+    public required string[] Values { get; set; }
+}
+
+public class SingleContent : ProfileContent
+{
+    public required string Value { get; set; }
+}
+
+public class BoolContent : ProfileContent
+{
+    public required bool Value { get; set; }
+}
+
+public abstract class ProfileContent
+{
+}
+
 public class Profile : ProfileBase
 {
-    public int? Version { get; set; }
-    public JsonNode? Info { get; set; }
+    public int Version { get; set; }
+    public ProfileContent[] Info { get; set; }
 
-    private Profile() {}
+    private Profile()
+    {
+        Info = [];
+    }
 
     [SetsRequiredMembers]
-    public Profile(ProfileBase other, int version = -1, JsonNode? info = null) : base(other)
+    public Profile(string name, bool gender, string phoneNumber, int birthYear, string region,
+                   ProfileContent[] info, int version = -1)
+        : base(name, gender, phoneNumber, birthYear, region)
     {
         if (version > -1) Version = version;
-        if (info != null) Info = info;
+        Info = info;
     }
 }

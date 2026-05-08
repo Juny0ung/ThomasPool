@@ -19,38 +19,27 @@ public class MongoProfileRepository : IProfileRepository
     private static FilterDefinition<Profile> IdentityFilter(ProfileBase p) =>
         Builders<Profile>.Filter.Eq(x => x.PhoneNumber, p.PhoneNumber);
 
-    public async Task RegisterAsync(ProfileBase profileBase)
+    public async Task SaveInfoAsync(Profile profile)
     {
-        Validator.ValidateObject(profileBase, new ValidationContext(profileBase), validateAllProperties: true);
-        var profile = new Profile(profileBase);
-        await _profiles.InsertOneAsync(profile);
+        Validator.ValidateObject(profile, new ValidationContext(profile), validateAllProperties: true);
+        var update = Builders<Profile>.Update
+            .Set(p => p.Version, profile.Version)
+            .Set(p => p.Info, profile.Info);
+
+        var result = await _profiles.UpdateOneAsync(IdentityFilter(profile), update);
+        if (result.MatchedCount == 0)
+            throw new KeyNotFoundException($"Profile not found: {profile.Name}");
     }
 
-    public async Task UnregisterAsync(ProfileBase profileBase)
+    public async Task DeleteProfileAsync(ProfileBase profileBase)
     {
         await _profiles.DeleteOneAsync(IdentityFilter(profileBase));
     }
 
-    public async Task SaveInfoAsync(ProfileBase profileBase, int version, JsonNode info)
+    public async Task<Profile> GetInfoAsync(ProfileBase profileBase)
     {
-        Validator.ValidateObject(profileBase, new ValidationContext(profileBase), validateAllProperties: true);
-        ArgumentOutOfRangeException.ThrowIfNegative(version);
-        info["version"] = version;
-        var update = Builders<Profile>.Update
-            .Set(p => p.Version, version)
-            .Set(p => p.Info, info);
-
-        var result = await _profiles.UpdateOneAsync(IdentityFilter(profileBase), update);
-        if (result.MatchedCount == 0)
-            throw new KeyNotFoundException($"Profile not found: {profileBase.Name}");
-    }
-
-    public async Task<JsonNode?> GetInfoAsync(ProfileBase profileBase)
-    {
-        Profile profile = await _profiles.Find(IdentityFilter(profileBase)).FirstOrDefaultAsync()
+        return await _profiles.Find(IdentityFilter(profileBase)).FirstOrDefaultAsync()
             ?? throw new KeyNotFoundException($"Profile not found: {profileBase.Name}");
-
-        return profile.Info;
     }
 
     public async Task<Profile[]> GetInfosAsync(string name, int skip = 0, int limit = 20)

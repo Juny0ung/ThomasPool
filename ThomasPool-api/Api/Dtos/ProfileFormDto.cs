@@ -4,17 +4,34 @@ using ThomasPool.Domain.Entities;
 
 namespace ThomasPool.Api.Dtos;
 
-public record QuestionFormDto(
-    [property: JsonPropertyName("question")]
-    [property: Required, StringLength(500, MinimumLength = 1)]
-    string Question,
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(QuestionFormDto), "question")]
+[JsonDerivedType(typeof(MultipleFormDto), "multiple")]
+public record QuestionFormDto
+{
+    [JsonPropertyName("question")]
+    [Required, StringLength(500, MinimumLength = 1)]
+    public required string Question { get; init; }
 
-    [property: JsonPropertyName("type")]
-    QuestionType Type,
+    [JsonPropertyName("questionType")]
+    public required QuestionType QuestionType { get; init; }
 
-    [property: JsonPropertyName("options")]
-    string[]? Options
-);
+    public virtual QuestionForm ToDomain() => new() { Question = Question, Type = QuestionType };
+
+    public static QuestionFormDto FromDomain(QuestionForm q) => q is MultipleForm m
+        ? new MultipleFormDto { Question = m.Question, QuestionType = m.Type, Options = m.Options }
+        : new QuestionFormDto { Question = q.Question, QuestionType = q.Type };
+}
+
+public record MultipleFormDto : QuestionFormDto
+{
+    [JsonPropertyName("options")]
+    [Required, MinLength(2)]
+    public required string[] Options { get; init; }
+
+    public override QuestionForm ToDomain() =>
+        new MultipleForm { Question = Question, Type = QuestionType, Options = Options };
+}
 
 public record ProfileFormRequest(
     [property: JsonPropertyName("questions")]
@@ -24,10 +41,7 @@ public record ProfileFormRequest(
 {
     public ProfileForm ToDomain() => new()
     {
-        Questions = [.. Questions.Select(q =>
-            q.Type is QuestionType.MultipleChoice or QuestionType.MultipleSelection
-                ? new MultipleForm { Question = q.Question, Type = q.Type, Options = q.Options ?? [] }
-                : new QuestionForm { Question = q.Question, Type = q.Type })]
+        Questions = [.. Questions.Select(q => q.ToDomain())]
     };
 }
 
@@ -38,8 +52,6 @@ public record ProfileFormResponse(
 {
     public static ProfileFormResponse FromDomain(ProfileForm form) => new(
         form.Version!.Value,
-        [.. form.Questions.Select(q => q is MultipleForm m
-            ? new QuestionFormDto(m.Question, m.Type, m.Options)
-            : new QuestionFormDto(q.Question, q.Type, null))]
+        [.. form.Questions.Select(QuestionFormDto.FromDomain)]
     );
 }

@@ -44,28 +44,23 @@ public class ProfileService
         return Result<ProfileForm>.Failure(Errors.ProfileForm.NotFound);
     }
 
-    public async Task<Result> UpdateProfileAsync(ProfileBase profileBase, int? version, JsonNode info)
+    public async Task<Result> UpdateProfileAsync(Profile profile)
     {
         try
         {
-            ProfileForm? validForm = await _profileFormRepository.GetFormAsync(version??-1);
+            ProfileForm? validForm = await _profileFormRepository.GetFormAsync(profile.Version);
             if (validForm == null || validForm.Version == null)
                 return Result.Failure(Errors.ProfileForm.NotFound);
             
-            if (!validForm.ValidateProfile(info))
+            if (!validForm.ValidateProfile(profile))
                 return Result.Failure(Errors.Profile.Invalid);
-            await _profileRepository.SaveInfoAsync(profileBase, validForm.Version.Value, info);        
+            await _profileRepository.SaveInfoAsync(profile);        
             return Result.Success();
         }
         catch
         {
             return Result.Failure(Errors.General.Unknown);
         }
-    }
-
-    public async Task<Result> UpdateProfileAsync(ProfileBase profileBase, ProfileForm profileForm, JsonNode info)
-    {
-        return await UpdateProfileAsync(profileBase, profileForm.Version??-1, info);
     }
 
     public async Task<Result<Profile[]>> GetProfilesAsync(string name, int skip, int limit)
