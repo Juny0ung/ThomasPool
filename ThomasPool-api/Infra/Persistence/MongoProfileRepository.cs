@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Nodes;
 using MongoDB.Driver;
 using ThomasPool.Domain.Entities;
 using ThomasPool.Domain.Interfaces;
@@ -21,7 +19,6 @@ public class MongoProfileRepository : IProfileRepository
 
     public async Task SaveInfoAsync(Profile profile)
     {
-        Validator.ValidateObject(profile, new ValidationContext(profile), validateAllProperties: true);
         var update = Builders<Profile>.Update
             .Set(p => p.Version, profile.Version)
             .Set(p => p.Info, profile.Info);

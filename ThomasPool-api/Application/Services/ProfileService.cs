@@ -21,8 +21,12 @@ public class ProfileService
     {
         try
         {
+            var results = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(profileForm, new ValidationContext(profileForm), results, true))
+                return Result.Failure(Errors.ProfileForm.Invalid);
+
             await _profileFormRepository.UpdateFormAsync(profileForm);
-            return Result.Success();        
+            return Result.Success();
         }
         catch
         {
@@ -48,13 +52,18 @@ public class ProfileService
     {
         try
         {
+            var results = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(profile, new ValidationContext(profile), results, true))
+                return Result.Failure(Errors.Profile.Invalid);
+
             ProfileForm? validForm = await _profileFormRepository.GetFormAsync(profile.Version);
             if (validForm == null || validForm.Version == null)
                 return Result.Failure(Errors.ProfileForm.NotFound);
-            
+
             if (!validForm.ValidateProfile(profile))
                 return Result.Failure(Errors.Profile.Invalid);
-            await _profileRepository.SaveInfoAsync(profile);        
+
+            await _profileRepository.SaveInfoAsync(profile);
             return Result.Success();
         }
         catch

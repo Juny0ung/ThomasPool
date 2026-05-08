@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using MongoDB.Driver;
 using ThomasPool.Domain.Entities;
 using ThomasPool.Domain.Interfaces;
@@ -23,7 +22,6 @@ public class MongoProfileFormRepository : IProfileFormRepository
 
     public async Task UpdateFormAsync(ProfileForm form)
     {
-        Validator.ValidateObject(form, new ValidationContext(form), validateAllProperties: true);
         for (int i = 0; i < _maxRetries; i++)
         {
             try

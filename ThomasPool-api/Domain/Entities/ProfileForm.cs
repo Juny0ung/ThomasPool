@@ -39,6 +39,16 @@ public class ProfileForm : IValidatableObject
         foreach (var (question, i) in Questions.Select((q, i) => (q, i)))
         {
             var results = new List<ValidationResult>();
+            switch (question.Type)
+            {
+                case QuestionType.MultipleChoice:
+                case QuestionType.MultipleSelection:
+                    if (question is not MultipleForm) yield return new ValidationResult($"Questions[{i}]: Invalid type");
+                    break;
+                default:
+                    if (question is MultipleForm) yield return new ValidationResult($"Questions[{i}]: Invalid type");
+                    break;
+            }
             if (!Validator.TryValidateObject(question, new ValidationContext(question), results, true))
                 foreach (var result in results)
                     yield return new ValidationResult($"Questions[{i}]: {result.ErrorMessage}");

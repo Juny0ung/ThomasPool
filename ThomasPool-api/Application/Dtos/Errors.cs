@@ -24,6 +24,7 @@ public static class Errors
     public static class ProfileForm
     {
         public static readonly Error NotFound = new ("pf_nf", "Profile form not found", ErrorType.NotFound);
+        public static readonly Error Invalid = new ("pf_iv", "Invalid profile form", ErrorType.Validation);
     }
 
     public static class General
