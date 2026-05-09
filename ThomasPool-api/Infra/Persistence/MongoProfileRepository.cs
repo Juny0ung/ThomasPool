@@ -19,6 +19,11 @@ public class MongoProfileRepository : IProfileRepository
 
     public async Task SaveInfoAsync(Profile profile)
     {
+        await _profiles.InsertOneAsync(profile);
+    }
+
+    public async Task UpdateInfoAsync(Profile profile)
+    {
         var update = Builders<Profile>.Update
             .Set(p => p.Version, profile.Version)
             .Set(p => p.Info, profile.Info);
@@ -33,10 +38,9 @@ public class MongoProfileRepository : IProfileRepository
         await _profiles.DeleteOneAsync(IdentityFilter(profileBase));
     }
 
-    public async Task<Profile> GetInfoAsync(ProfileBase profileBase)
+    public async Task<Profile?> GetInfoAsync(ProfileBase profileBase)
     {
-        return await _profiles.Find(IdentityFilter(profileBase)).FirstOrDefaultAsync()
-            ?? throw new KeyNotFoundException($"Profile not found: {profileBase.Name}");
+        return await _profiles.Find(IdentityFilter(profileBase)).FirstOrDefaultAsync();
     }
 
     public async Task<Profile[]> GetInfosAsync(string name, int skip = 0, int limit = 20)

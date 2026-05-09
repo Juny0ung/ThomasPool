@@ -61,8 +61,12 @@ public class ProfileService
 
             if (!validForm.ValidateProfile(profile))
                 return Result.Failure(Errors.Profile.Invalid);
-
-            await _profileRepository.SaveInfoAsync(profile);
+            
+            // TODO: validate password
+            var prevProfile = await _profileRepository.GetInfoAsync(profile);
+            if (prevProfile != null) await _profileRepository.UpdateInfoAsync(profile);            
+            else await _profileRepository.SaveInfoAsync(profile);
+            
             return Result.Success();
         }
         catch
