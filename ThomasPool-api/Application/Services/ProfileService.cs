@@ -42,13 +42,12 @@ public class ProfileService
         try
         {
             ProfileForm? profileForm = await _profileFormRepository.GetFormAsync(version);
-            if (profileForm != null) return Result<ProfileForm>.Success(profileForm);
+            return Result<ProfileForm>.Success(profileForm ?? new ProfileForm{ Version = -1, Questions = [] });
         }
         catch
         {
             return Result<ProfileForm>.Failure(Errors.General.Unknown);
         }
-        return Result<ProfileForm>.Failure(Errors.ProfileForm.NotFound);
     }
 
     public async Task<Result> UpdateProfileAsync(Profile profile)
