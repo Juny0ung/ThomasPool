@@ -57,7 +57,7 @@ public class AdminService
         try
         {
             var admins = await _adminRepository.FindUsersAsync(skip, limit, role: Role.Pending);
-            return Result<AdminInfo[]>.Success([.. admins.Select(a => new AdminInfo { Name = a.Name, Id = a.Id, Role = a.Role })]);
+            return Result<AdminInfo[]>.Success([.. admins.Select(a => new AdminInfo { Name = a.Name, AdminId = a.AdminId, Role = a.Role })]);
         }
         catch
         {

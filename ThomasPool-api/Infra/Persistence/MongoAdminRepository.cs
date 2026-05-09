@@ -18,7 +18,7 @@ public class MongoAdminRepository : IAdminRepository
         var admin = new Admin
         {
             Name = name,
-            Id = id,
+            AdminId = id,
             Password = password,
             Role = Role.Pending
         };
@@ -34,14 +34,14 @@ public class MongoAdminRepository : IAdminRepository
 
     public async Task<Admin?> FindUserAsync(string id)
     {
-        return await _admins.Find(a => a.Id == id).FirstOrDefaultAsync();
+        return await _admins.Find(a => a.AdminId == id).FirstOrDefaultAsync();
     }
 
     public async Task<Admin[]> FindUsersAsync(int skip = 0, int limit = 20, string? name = null, string? id = null, Role? role = null)
     {
         var filter = Builders<Admin>.Filter.Empty;
         if (name != null) filter &= Builders<Admin>.Filter.Eq(a => a.Name, name);
-        if (id != null)   filter &= Builders<Admin>.Filter.Eq(a => a.Id, id);
+        if (id != null)   filter &= Builders<Admin>.Filter.Eq(a => a.AdminId, id);
         if (role != null) filter &= Builders<Admin>.Filter.Eq(a => a.Role, role);
 
         var admins = await _admins.Find(filter)
@@ -53,7 +53,7 @@ public class MongoAdminRepository : IAdminRepository
 
     public async Task ApproveUsersAsync(string[] ids)
     {
-        var filter = Builders<Admin>.Filter.In(a => a.Id, ids);
+        var filter = Builders<Admin>.Filter.In(a => a.AdminId, ids);
         var update = Builders<Admin>.Update.Set(a => a.Role, Role.Admin);
         var result = await _admins.UpdateManyAsync(filter, update);
         if (result.MatchedCount != ids.Length)

@@ -7,7 +7,7 @@ namespace ThomasPool.Api.Dtos;
 public record LoginDto(
     [property: JsonPropertyName("id")]
     [property: Required]
-    string Id,
+    string AdminId,
 
     [property: JsonPropertyName("password")]
     [property: Required]

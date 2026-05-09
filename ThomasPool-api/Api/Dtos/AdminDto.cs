@@ -8,7 +8,7 @@ namespace ThomasPool.Api.Dtos;
 public record AdminDto(
     [property: JsonPropertyName("id")]
     [property: Required]
-    string Id,
+    string AdminId,
 
     [property: JsonPropertyName("name")]
     [property: Required]
@@ -20,7 +20,7 @@ public record AdminDto(
 )
 {
     public static AdminDto FromDomain(AdminInfo adminInfo) => new(
-        adminInfo.Id,
+        adminInfo.AdminId,
         adminInfo.Name,
         adminInfo.Role
     );

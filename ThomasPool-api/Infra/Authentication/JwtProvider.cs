@@ -20,7 +20,7 @@ public class JwtProvider : IJwtProvider
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, admin.Id),
+            new Claim(ClaimTypes.NameIdentifier, admin.AdminId),
             new Claim(ClaimTypes.Name, admin.Name),
             new Claim(ClaimTypes.Role, "Admin")
         };

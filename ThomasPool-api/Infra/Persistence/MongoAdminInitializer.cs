@@ -15,7 +15,7 @@ public class MongoAdminInitializer : IDbInitializer
 
         var model = new CreateIndexModel<Admin>(
             Builders<Admin>.IndexKeys
-                .Ascending(a => a.Id),
+                .Ascending(a => a.AdminId),
             new CreateIndexOptions { Unique = true }
         );
 

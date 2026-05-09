@@ -11,7 +11,7 @@ public record RegisterDto(
 
     [property: JsonPropertyName("id")]
     [property: Required, StringLength(30, MinimumLength = 2)]
-    string Id,
+    string AdminId,
 
     [property: JsonPropertyName("password")]
     [property: Required]

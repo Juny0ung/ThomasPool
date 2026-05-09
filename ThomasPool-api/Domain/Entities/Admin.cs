@@ -11,7 +11,7 @@ public enum Role
 public class AdminInfo
 {
     public required string Name { get; set; }
-    public required string Id { get; set; }
+    public required string AdminId { get; set; }
     public required Role Role { get; set; }
 }
 

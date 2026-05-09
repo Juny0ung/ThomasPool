@@ -27,14 +27,14 @@ public class AdminController : ApiControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        Result result = await _adminService.RegisterAsync(registerDto.Name, registerDto.Id, registerDto.Password);
+        Result result = await _adminService.RegisterAsync(registerDto.Name, registerDto.AdminId, registerDto.Password);
         return result.IsSuccess ? Ok() : HandleFailure(result.Error);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        Result<string> result = await _adminService.LoginAsync(loginDto.Id, loginDto.Password);
+        Result<string> result = await _adminService.LoginAsync(loginDto.AdminId, loginDto.Password);
         return result.IsSuccess ? Ok(new { Token = result.Value} ) : HandleFailure(result.Error);
     }
 
