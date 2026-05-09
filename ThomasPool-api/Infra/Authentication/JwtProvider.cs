@@ -11,9 +11,12 @@ namespace ThomasPool.Infra.Authentication;
 public class JwtProvider : IJwtProvider
 {
     private readonly IConfiguration _config;
-    public JwtProvider(IConfiguration configuration)
+    private readonly ILogger<JwtProvider> _logger;
+
+    public JwtProvider(IConfiguration configuration, ILogger<JwtProvider> logger)
     {
         _config = configuration;
+        _logger = logger;
     }
 
     public string GenerateToken(Admin admin)
@@ -35,7 +38,7 @@ public class JwtProvider : IJwtProvider
             expires: DateTime.Now.AddHours(2),
             signingCredentials: creds
         );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        string tokenString =  new JwtSecurityTokenHandler().WriteToken(token);
+        return tokenString;
     }
 }
