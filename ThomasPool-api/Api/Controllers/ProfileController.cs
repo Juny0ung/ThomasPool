@@ -37,7 +37,6 @@ public class ProfileController : ApiControllerBase
     [HttpPost("profile")]
     public async Task<IActionResult> UpdateProfile(ProfileDto profileDto)
     {
-        if (profileDto.Info == null || profileDto.Version <= -1) return HandleFailure(Errors.Profile.Invalid);
         Result result = await _profileService.UpdateProfileAsync(profileDto.ToProfile());
         return result.IsSuccess ? Ok() : HandleFailure(result.Error);
     }
