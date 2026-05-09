@@ -10,22 +10,46 @@ public class MongoAdminRepository : IAdminRepository
     public MongoAdminRepository(IMongoClient client, IConfiguration configuration)
     {
         var database = client.GetDatabase(configuration["MongoDB:DatabaseName"]);
-        _admins = database.GetCollection<Admin>("admins");
+        _admins = database.GetCollection<Admin>("admin");
     }
 
-    public async Task RegisterAsync(string name, string password)
+    public async Task AddUserAsync(string name, string id, string password)
     {
         var admin = new Admin
         {
             Name = name,
-            Password = password
+            Id = id,
+            Password = password,
+            Role = Role.Pending
         };
         await _admins.InsertOneAsync(admin);
     }
 
-    public async Task<bool> LoginAsync(string name, string password)
+    public async Task<Admin?> FindUserAsync(string id)
     {
-        Admin admin = await _admins.Find(a => a.Name == name).FirstOrDefaultAsync();
-        return admin?.Password == password;
+        return await _admins.Find(a => a.Id == id).FirstOrDefaultAsync();
+    }
+
+    public async Task<Admin[]> FindUsersAsync(int skip = 0, int limit = 20, string? name = null, string? id = null, Role? role = null)
+    {
+        var filter = Builders<Admin>.Filter.Empty;
+        if (name != null) filter &= Builders<Admin>.Filter.Eq(a => a.Name, name);
+        if (id != null)   filter &= Builders<Admin>.Filter.Eq(a => a.Id, id);
+        if (role != null) filter &= Builders<Admin>.Filter.Eq(a => a.Role, role);
+
+        var admins = await _admins.Find(filter)
+            .Skip(skip)
+            .Limit(limit)
+            .ToListAsync();
+        return [.. admins];
+    }
+
+    public async Task ApproveUsersAsync(string[] ids)
+    {
+        var filter = Builders<Admin>.Filter.In(a => a.Id, ids);
+        var update = Builders<Admin>.Update.Set(a => a.Role, Role.Admin);
+        var result = await _admins.UpdateManyAsync(filter, update);
+        if (result.MatchedCount != ids.Length)
+            throw new KeyNotFoundException($"Some ids not found ({result.MatchedCount}/{ids.Length} matched)");
     }
 }

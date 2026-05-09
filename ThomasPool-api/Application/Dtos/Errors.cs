@@ -15,6 +15,13 @@ public record Error(string Code, string Message, ErrorType Type)
 
 public static class Errors
 {
+    public static class Admin
+    {
+        public static readonly Error NotFound = new ("a_nf", "Account not found", ErrorType.NotFound);
+        public static readonly Error NotApproved = new ("a_na", "Not approved", ErrorType.Validation);
+        public static readonly Error Invalid = new ("a_iv", "Invalid account", ErrorType.Validation);    
+    }
+
     public static class Profile
     {
         public static readonly Error NotFound = new ("p_nf", "Profile not found", ErrorType.NotFound);

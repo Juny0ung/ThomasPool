@@ -1,7 +1,12 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using System.Text;
 using System.Text.Json.Nodes;
+using ThomasPool.Application.Services;
 using ThomasPool.Domain.Interfaces;
+using ThomasPool.Infra.Authentication;
 using ThomasPool.Infra.Persistence;
 
 BsonSerializer.RegisterSerializer(typeof(JsonNode), JsonNodeSerializer.Instance);
@@ -18,11 +23,36 @@ builder.Services.AddScoped<IAdminRepository, MongoAdminRepository>();
 builder.Services.AddScoped<IProfileRepository, MongoProfileRepository>();
 builder.Services.AddScoped<IProfileFormRepository, MongoProfileFormRepository>();
 
+builder.Services.AddTransient<IDbInitializer, MongoAdminInitializer>();
 builder.Services.AddTransient<IDbInitializer, MongoProfileInitializer>();
 builder.Services.AddTransient<IDbInitializer, MongoProfileFormInitializer>();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
+builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+
+builder.Services.AddScoped<AdminService>();
+builder.Services.AddScoped<ProfileService>();
+
+builder.Services.AddControllers();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? ""))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -47,6 +77,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 
 var summaries = new[]
 {
