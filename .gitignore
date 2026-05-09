@@ -1,3 +1,6 @@
 ThomasPool-api/bin/
 ThomasPool-api/obj/
 ThomasPool-api/appsettings.Development.json
+
+ThomasPool-api.Tests/bin/
+ThomasPool-api.Tests/obj/

@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThomasPool-api", "ThomasPool-api\ThomasPool-api.csproj", "{0EA8B616-CA3D-998F-E480-E0F3DC04ACAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThomasPool-api.Tests", "ThomasPool-api.Tests\ThomasPool-api.Tests.csproj", "{E2EB95AB-5159-46FD-BB2B-2C7A010B4F3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{0EA8B616-CA3D-998F-E480-E0F3DC04ACAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EA8B616-CA3D-998F-E480-E0F3DC04ACAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EA8B616-CA3D-998F-E480-E0F3DC04ACAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2EB95AB-5159-46FD-BB2B-2C7A010B4F3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2EB95AB-5159-46FD-BB2B-2C7A010B4F3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2EB95AB-5159-46FD-BB2B-2C7A010B4F3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2EB95AB-5159-46FD-BB2B-2C7A010B4F3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
