@@ -5,11 +5,11 @@ using System.Text.Json.Serialization;
 namespace ThomasPool.Api.Dtos;
 
 public record LoginDto(
-    [property: JsonPropertyName("id")]
-    [property: Required]
+    [property: JsonPropertyName("adminId")]
+    [Required]
     string AdminId,
 
     [property: JsonPropertyName("password")]
-    [property: Required]
+    [Required]
     string Password
 );

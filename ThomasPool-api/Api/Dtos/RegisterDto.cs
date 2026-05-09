@@ -6,14 +6,14 @@ namespace ThomasPool.Api.Dtos;
 
 public record RegisterDto(
     [property: JsonPropertyName("name")]
-    [property: Required, StringLength(100, MinimumLength = 1)]
+    [Required, StringLength(100, MinimumLength = 1)]
     string Name,
 
-    [property: JsonPropertyName("id")]
-    [property: Required, StringLength(30, MinimumLength = 2)]
+    [property: JsonPropertyName("adminId")]
+    [Required, StringLength(30, MinimumLength = 2)]
     string AdminId,
 
     [property: JsonPropertyName("password")]
-    [property: Required]
+    [Required]
     string Password
 );

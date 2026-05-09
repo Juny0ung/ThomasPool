@@ -35,7 +35,7 @@ public record MultipleFormDto : QuestionFormDto
 
 public record ProfileFormRequest(
     [property: JsonPropertyName("questions")]
-    [property: Required, MinLength(1)]
+    [Required, MinLength(1)]
     QuestionFormDto[] Questions
 )
 {

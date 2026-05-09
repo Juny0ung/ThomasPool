@@ -44,23 +44,23 @@ public record MultipleContentDto(
 
 public record ProfileBaseDto(
     [property: JsonPropertyName("name")]
-    [property: Required, StringLength(100, MinimumLength = 1)]
+    [Required, StringLength(100, MinimumLength = 1)]
     string Name,
 
     [property: JsonPropertyName("gender")]
-    [property: Required]
+    [Required]
     bool Gender,
 
     [property: JsonPropertyName("phoneNumber")]
-    [property: Required, RegularExpression(@"^\d{11}$", ErrorMessage = "PhoneNumber must be 11 digits.")]
+    [Required, RegularExpression(@"^\d{11}$", ErrorMessage = "PhoneNumber must be 11 digits.")]
     string PhoneNumber,
 
     [property: JsonPropertyName("birthYear")]
-    [property: Range(1900, 2100)]
+    [Range(1900, 2100)]
     int BirthYear,
 
     [property: JsonPropertyName("region")]
-    [property: Required, StringLength(100, MinimumLength = 1)]
+    [Required, StringLength(100, MinimumLength = 1)]
     string Region
 )
 {
@@ -69,23 +69,23 @@ public record ProfileBaseDto(
 
 public record ProfileDto(
     [property: JsonPropertyName("name")]
-    [property: Required, StringLength(100, MinimumLength = 1)]
+    [Required, StringLength(100, MinimumLength = 1)]
     string Name,
 
     [property: JsonPropertyName("gender")]
-    [property: Required]
+    [Required]
     bool Gender,
 
     [property: JsonPropertyName("phoneNumber")]
-    [property: Required, RegularExpression(@"^\d{11}$", ErrorMessage = "PhoneNumber must be 11 digits.")]
+    [Required, RegularExpression(@"^\d{11}$", ErrorMessage = "PhoneNumber must be 11 digits.")]
     string PhoneNumber,
 
     [property: JsonPropertyName("birthYear")]
-    [property: Range(1900, 2100)]
+    [Range(1900, 2100)]
     int BirthYear,
 
     [property: JsonPropertyName("region")]
-    [property: Required, StringLength(100, MinimumLength = 1)]
+    [Required, StringLength(100, MinimumLength = 1)]
     string Region,
 
     [property: JsonPropertyName("version")] int Version,
