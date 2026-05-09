@@ -18,14 +18,18 @@ public class ProfileService
 
     public async Task<Result> UpdateProfileFormAsync(ProfileForm profileForm)
     {
+        var results = new List<ValidationResult>();
+        if (!Validator.TryValidateObject(profileForm, new ValidationContext(profileForm), results, true))
+            return Result.Failure(Errors.ProfileForm.Invalid);
+
         try
         {
-            var results = new List<ValidationResult>();
-            if (!Validator.TryValidateObject(profileForm, new ValidationContext(profileForm), results, true))
-                return Result.Failure(Errors.ProfileForm.Invalid);
-
             await _profileFormRepository.UpdateFormAsync(profileForm);
             return Result.Success();
+        }
+        catch (InvalidOperationException)
+        {
+            return Result.Failure(Errors.ProfileForm.Conflict);
         }
         catch
         {
@@ -64,10 +68,14 @@ public class ProfileService
             
             // TODO: validate password
             var prevProfile = await _profileRepository.GetInfoAsync(profile);
-            if (prevProfile != null) await _profileRepository.UpdateInfoAsync(profile);            
+            if (prevProfile != null) await _profileRepository.UpdateInfoAsync(profile);
             else await _profileRepository.SaveInfoAsync(profile);
-            
+
             return Result.Success();
+        }
+        catch (InvalidOperationException)
+        {
+            return Result.Failure(Errors.Profile.Conflict);
         }
         catch
         {

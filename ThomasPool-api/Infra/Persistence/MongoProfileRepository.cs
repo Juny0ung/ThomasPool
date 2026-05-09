@@ -19,7 +19,14 @@ public class MongoProfileRepository : IProfileRepository
 
     public async Task SaveInfoAsync(Profile profile)
     {
-        await _profiles.InsertOneAsync(profile);
+        try
+        {
+            await _profiles.InsertOneAsync(profile);
+        }
+        catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+        {
+            throw new InvalidOperationException($"Profile already exists: {profile.PhoneNumber}");
+        }
     }
 
     public async Task UpdateInfoAsync(Profile profile)

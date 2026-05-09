@@ -22,7 +22,14 @@ public class MongoAdminRepository : IAdminRepository
             Password = password,
             Role = Role.Pending
         };
-        await _admins.InsertOneAsync(admin);
+        try
+        {
+            await _admins.InsertOneAsync(admin);
+        }
+        catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+        {
+            throw new InvalidOperationException($"Id already exists: {id}");
+        }
     }
 
     public async Task<Admin?> FindUserAsync(string id)

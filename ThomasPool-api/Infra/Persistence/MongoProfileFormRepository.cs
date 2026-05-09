@@ -36,7 +36,7 @@ public class MongoProfileFormRepository : IProfileFormRepository
                 await Task.Delay(Random.Shared.Next(10, 50));
             }
         }
-        throw new Exception($"Duplicated version {form.Version}");
+        throw new InvalidOperationException($"Failed to insert form after {_maxRetries} retries due to version conflict");
     }
 
     public async Task<ProfileForm?> GetFormAsync(int? version)

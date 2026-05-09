@@ -19,19 +19,22 @@ public static class Errors
     {
         public static readonly Error NotFound = new ("a_nf", "Account not found", ErrorType.NotFound);
         public static readonly Error NotApproved = new ("a_na", "Not approved", ErrorType.Validation);
-        public static readonly Error Invalid = new ("a_iv", "Invalid account", ErrorType.Validation);    
+        public static readonly Error Invalid = new ("a_iv", "Invalid account", ErrorType.Validation);
+        public static readonly Error Conflict = new ("a_cf", "Id already exists", ErrorType.Conflict);
     }
 
     public static class Profile
     {
         public static readonly Error NotFound = new ("p_nf", "Profile not found", ErrorType.NotFound);
         public static readonly Error Invalid = new ("p_iv", "Invalid profile", ErrorType.Validation);
+        public static readonly Error Conflict = new ("p_cf", "Profile already exists", ErrorType.Conflict);
     }
 
     public static class ProfileForm
     {
         public static readonly Error NotFound = new ("pf_nf", "Profile form not found", ErrorType.NotFound);
         public static readonly Error Invalid = new ("pf_iv", "Invalid profile form", ErrorType.Validation);
+        public static readonly Error Conflict = new ("pf_cf", "Version conflict, please retry", ErrorType.Conflict);
     }
 
     public static class General

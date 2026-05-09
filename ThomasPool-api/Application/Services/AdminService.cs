@@ -23,6 +23,10 @@ public class AdminService
             await _adminRepository.AddUserAsync(name, id, _passwordHasher.Hash(password));
             return Result.Success();
         }
+        catch (InvalidOperationException)
+        {
+            return Result.Failure(Errors.Admin.Conflict);
+        }
         catch
         {
             return Result.Failure(Errors.General.Unknown);
