@@ -5,11 +5,24 @@ using MongoDB.Driver;
 using System.Text;
 using System.Text.Json.Nodes;
 using ThomasPool.Application.Services;
+using ThomasPool.Domain.Entities;
 using ThomasPool.Domain.Interfaces;
 using ThomasPool.Infra.Authentication;
 using ThomasPool.Infra.Persistence;
 
 BsonSerializer.RegisterSerializer(typeof(JsonNode), JsonNodeSerializer.Instance);
+
+BsonClassMap.RegisterClassMap<Admin>(cm =>
+{
+    cm.AutoMap();
+    cm.SetIgnoreExtraElements(true);
+});
+
+BsonClassMap.RegisterClassMap<Profile>(cm =>
+{
+    cm.AutoMap();
+    cm.SetIgnoreExtraElements(true);
+});
 
 var builder = WebApplication.CreateBuilder(args);
 
