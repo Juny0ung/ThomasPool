@@ -1,13 +1,16 @@
-import { Navigate, Outlet } from 'react-router-dom'
-
-function isAdmin(): boolean {
-  // TODO: 실제 인증 로직으로 교체
-  return false
-}
+import { useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function AdminGuard() {
-  if (!isAdmin()) {
-    return <Navigate to="/" replace />
-  }
+  const { token } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!token) navigate('/admin/login', { replace: true })
+  }, [token])
+
+  if (!token) return null
+
   return <Outlet />
 }

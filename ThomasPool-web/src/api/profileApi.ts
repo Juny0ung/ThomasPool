@@ -1,0 +1,41 @@
+import type { AnyQuestion, ProfileDto, ProfileFormResponse } from './types'
+
+const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+
+export async function getProfileForm(): Promise<ProfileFormResponse> {
+  const res = await fetch(`${BASE_URL}/api/profile/profileform`)
+  if (!res.ok) throw new Error('Failed to fetch profile form')
+  return res.json()
+}
+
+export async function submitProfile(data: ProfileDto): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/profile/profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Failed to submit profile')
+}
+
+export async function updateProfileForm(token: string, questions: AnyQuestion[]): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/profile/profileform`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ questions }),
+  })
+  if (!res.ok) throw new Error('폼 업데이트에 실패했습니다.')
+}
+
+export async function getProfiles(
+  token: string,
+  name: string,
+  skip: number,
+  limit: number,
+): Promise<ProfileDto[]> {
+  const params = new URLSearchParams({ name, skip: String(skip), limit: String(limit) })
+  const res = await fetch(`${BASE_URL}/api/profile/profiles?${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error('프로필 목록을 불러오는데 실패했습니다.')
+  return res.json()
+}

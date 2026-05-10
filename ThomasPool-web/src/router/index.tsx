@@ -1,44 +1,30 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
-import MainLayout from '../layouts/MainLayout'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
+import MainLayout from '../layouts/MainLayout'
+import LoginPage from '../pages/admin/LoginPage'
 import AdminGuard from './AdminGuard'
 
-const HomePage = lazy(() => import('../pages/HomePage'))
 const DashboardPage = lazy(() => import('../pages/admin/DashboardPage'))
 
-const router = createBrowserRouter([
-  {
-    element: <MainLayout />,
-    children: [
-      {
-        path: '/',
-        element: (
-          <Suspense fallback={null}>
-            <HomePage />
-          </Suspense>
-        ),
-      },
-    ],
-  },
-  {
-    element: <AdminGuard />,
-    children: [
-      {
-        element: <AdminLayout />,
-        children: [
-          {
-            path: '/admin',
-            element: (
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<MainLayout />} />
+      <Route path="/admin/login" element={<LoginPage />} />
+      <Route element={<AdminGuard />}>
+        <Route element={<AdminLayout />}>
+          <Route
+            path="/admin"
+            element={
               <Suspense fallback={null}>
                 <DashboardPage />
               </Suspense>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-])
-
-export default router
+            }
+          />
+        </Route>
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}

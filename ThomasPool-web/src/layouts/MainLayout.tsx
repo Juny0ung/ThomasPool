@@ -1,14 +1,5 @@
-import { Outlet } from 'react-router-dom'
+import ProfileForm from '../components/ProfileForm'
 
 export default function MainLayout() {
-  return (
-    <div>
-      <header>
-        <nav>ThomasPool</nav>
-      </header>
-      <main>
-        <Outlet />
-      </main>
-    </div>
-  )
+  return <ProfileForm />
 }
