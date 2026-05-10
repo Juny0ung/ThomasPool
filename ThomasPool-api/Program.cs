@@ -24,6 +24,12 @@ BsonClassMap.RegisterClassMap<Profile>(cm =>
     cm.SetIgnoreExtraElements(true);
 });
 
+BsonClassMap.RegisterClassMap<ProfileForm>(cm =>
+{
+    cm.AutoMap();
+    cm.SetIgnoreExtraElements(true);
+});
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IMongoClient>(sp =>
