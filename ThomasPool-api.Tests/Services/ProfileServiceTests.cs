@@ -126,14 +126,15 @@ public class ProfileServiceTests
     }
 
     [Fact]
-    public async Task GetProfileFormAsync_FormNotFound_ReturnsNotFound()
+    public async Task GetProfileFormAsync_FormNotFound_ReturnsEmpty()
     {
         _formRepo.Setup(x => x.GetFormAsync(It.IsAny<int?>())).ReturnsAsync((ProfileForm?)null);
 
         var result = await _sut.GetProfileFormAsync(999);
 
-        Assert.False(result.IsSuccess);
-        Assert.Equal(Errors.ProfileForm.NotFound, result.Error);
+        Assert.True(result.IsSuccess);
+        Assert.Equal(-1, result.Value.Version);
+        Assert.Empty(result.Value.Questions);
     }
 
     [Fact]
