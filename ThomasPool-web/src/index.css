@@ -66,6 +66,10 @@ body {
   margin: 0;
 }
 
+button, label:has(input[type="radio"]), label:has(input[type="checkbox"]) {
+  cursor: pointer;
+}
+
 h1,
 h2 {
   font-family: var(--heading);

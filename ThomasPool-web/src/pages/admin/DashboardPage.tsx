@@ -6,11 +6,11 @@ import ProfilesPanel from './panels/ProfilesPanel'
 
 type ActivePanel = 'approve' | 'form' | 'profiles' | null
 
-const PANEL_LABELS: Record<NonNullable<ActivePanel>, string> = {
-  approve: 'Admin 승인',
-  form: '설문 폼 관리',
-  profiles: '프로필 열람',
-}
+const PANELS: { key: NonNullable<ActivePanel>; label: string; icon: string }[] = [
+  { key: 'approve', label: 'Admin 승인', icon: '✓' },
+  { key: 'form', label: '설문 폼 관리', icon: '✎' },
+  { key: 'profiles', label: '프로필 열람', icon: '☰' },
+]
 
 export default function DashboardPage() {
   const [active, setActive] = useState<ActivePanel>(null)
@@ -21,22 +21,32 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div>
-        <button onClick={() => toggle('approve')}>Admin 승인</button>
-        <button onClick={() => toggle('form')}>설문 폼 관리</button>
-        <button onClick={() => toggle('profiles')}>프로필 열람</button>
+      <div className="flex gap-3 border-b border-gray-100 bg-white px-6 py-4">
+        {PANELS.map(({ key, label, icon }) => (
+          <button
+            key={key}
+            onClick={() => toggle(key)}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition ${
+              active === key
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <span>{icon}</span>
+            {label}
+          </button>
+        ))}
       </div>
 
-      {active && (
-        <div>
-          <h2>{PANEL_LABELS[active]}</h2>
+      {active ? (
+        <div className="px-6 py-6">
           {active === 'approve' && <ApprovePanel />}
           {active === 'form' && <ProfileFormPanel />}
           {active === 'profiles' && <ProfilesPanel />}
         </div>
+      ) : (
+        <ProfileForm />
       )}
-
-      <ProfileForm />
     </div>
   )
 }
