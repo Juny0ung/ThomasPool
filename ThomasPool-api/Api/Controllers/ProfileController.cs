@@ -38,6 +38,8 @@ public class ProfileController : ApiControllerBase
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateProfile([FromForm] string profile, IFormFile photo)
     {
+        if (photo == null) return HandleFailure(Errors.Profile.Invalid);
+
         var profileRequest = JsonSerializer.Deserialize<ProfileRequest>(profile);
         if (profileRequest == null) return HandleFailure(Errors.Profile.Invalid);
 
