@@ -10,11 +10,14 @@ public class ProfileServiceTests
 {
     private readonly Mock<IProfileFormRepository> _formRepo = new();
     private readonly Mock<IProfileRepository> _profileRepo = new();
+    private readonly Mock<IPhotoRepository> _photoRepo = new();
     private readonly ProfileService _sut;
+
+    private static readonly byte[] SamplePhoto = [0xFF, 0xD8, 0xFF];
 
     public ProfileServiceTests()
     {
-        _sut = new ProfileService(_formRepo.Object, _profileRepo.Object);
+        _sut = new ProfileService(_formRepo.Object, _profileRepo.Object, _photoRepo.Object);
     }
 
     private static ProfileForm ValidForm(int version = 1) => new ProfileForm
@@ -126,7 +129,7 @@ public class ProfileServiceTests
     }
 
     [Fact]
-    public async Task GetProfileFormAsync_FormNotFound_ReturnsEmpty()
+    public async Task GetProfileFormAsync_FormNotFound_ReturnsEmptyForm()
     {
         _formRepo.Setup(x => x.GetFormAsync(It.IsAny<int?>())).ReturnsAsync((ProfileForm?)null);
 
@@ -159,30 +162,36 @@ public class ProfileServiceTests
         var form = ValidForm(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
         _profileRepo.Setup(x => x.GetInfoAsync(profile)).ReturnsAsync((Profile?)null);
+        _photoRepo.Setup(x => x.SavePhotoAsync(It.IsAny<string>(), SamplePhoto)).Returns(Task.CompletedTask);
         _profileRepo.Setup(x => x.SaveInfoAsync(profile)).Returns(Task.CompletedTask);
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.True(result.IsSuccess);
         _profileRepo.Verify(x => x.SaveInfoAsync(profile), Times.Once);
         _profileRepo.Verify(x => x.UpdateInfoAsync(It.IsAny<Profile>()), Times.Never);
+        _photoRepo.Verify(x => x.SavePhotoAsync(It.IsAny<string>(), SamplePhoto), Times.Once);
     }
 
     [Fact]
-    public async Task UpdateProfileAsync_ExistingProfile_UpdatesAndReturnsSuccess()
+    public async Task UpdateProfileAsync_ExistingProfile_ReusesPhotoIdAndUpdates()
     {
         var profile = ValidProfile(version: 1);
-        var form = ValidForm(version: 1);
         var existing = ValidProfile(version: 1);
+        existing.PhotoId = "existing-photo-id";
+        var form = ValidForm(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
         _profileRepo.Setup(x => x.GetInfoAsync(profile)).ReturnsAsync(existing);
+        _photoRepo.Setup(x => x.SavePhotoAsync("existing-photo-id", SamplePhoto)).Returns(Task.CompletedTask);
         _profileRepo.Setup(x => x.UpdateInfoAsync(profile)).Returns(Task.CompletedTask);
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.True(result.IsSuccess);
+        Assert.Equal("existing-photo-id", profile.PhotoId);
         _profileRepo.Verify(x => x.UpdateInfoAsync(profile), Times.Once);
         _profileRepo.Verify(x => x.SaveInfoAsync(It.IsAny<Profile>()), Times.Never);
+        _photoRepo.Verify(x => x.SavePhotoAsync("existing-photo-id", SamplePhoto), Times.Once);
     }
 
     [Fact]
@@ -190,7 +199,7 @@ public class ProfileServiceTests
     {
         var profile = new Profile("홍길동", true, "0101234", 1990, "서울", [new SingleContent { Value = "hello" }], 1);
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.Profile.Invalid, result.Error);
@@ -203,7 +212,7 @@ public class ProfileServiceTests
         var profile = ValidProfile(version: 99);
         _formRepo.Setup(x => x.GetFormAsync(99)).ReturnsAsync((ProfileForm?)null);
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.ProfileForm.NotFound, result.Error);
@@ -225,7 +234,7 @@ public class ProfileServiceTests
         var profile = ValidProfile(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.Profile.Invalid, result.Error);
@@ -244,7 +253,7 @@ public class ProfileServiceTests
             [new SingleContent { Value = "answer" }], version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.Profile.Invalid, result.Error);
@@ -257,9 +266,10 @@ public class ProfileServiceTests
         var form = ValidForm(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
         _profileRepo.Setup(x => x.GetInfoAsync(profile)).ReturnsAsync((Profile?)null);
+        _photoRepo.Setup(x => x.SavePhotoAsync(It.IsAny<string>(), SamplePhoto)).Returns(Task.CompletedTask);
         _profileRepo.Setup(x => x.SaveInfoAsync(profile)).ThrowsAsync(new InvalidOperationException());
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.Profile.Conflict, result.Error);
@@ -271,7 +281,44 @@ public class ProfileServiceTests
         var profile = ValidProfile(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ThrowsAsync(new Exception("db error"));
 
-        var result = await _sut.UpdateProfileAsync(profile);
+        var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(Errors.General.Unknown, result.Error);
+    }
+
+    #endregion
+
+    #region GetPhotoAsync
+
+    [Fact]
+    public async Task GetPhotoAsync_PhotoExists_ReturnsPhoto()
+    {
+        _photoRepo.Setup(x => x.GetPhotoAsync("photo-1")).ReturnsAsync(SamplePhoto);
+
+        var result = await _sut.GetPhotoAsync("photo-1");
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(SamplePhoto, result.Value);
+    }
+
+    [Fact]
+    public async Task GetPhotoAsync_PhotoNotFound_ReturnsNotFound()
+    {
+        _photoRepo.Setup(x => x.GetPhotoAsync("missing")).ReturnsAsync((byte[]?)null);
+
+        var result = await _sut.GetPhotoAsync("missing");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(Errors.Photo.NotFound, result.Error);
+    }
+
+    [Fact]
+    public async Task GetPhotoAsync_UnexpectedException_ReturnsUnknownError()
+    {
+        _photoRepo.Setup(x => x.GetPhotoAsync(It.IsAny<string>())).ThrowsAsync(new Exception("db error"));
+
+        var result = await _sut.GetPhotoAsync("photo-1");
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.General.Unknown, result.Error);
