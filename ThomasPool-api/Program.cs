@@ -8,6 +8,7 @@ using ThomasPool.Application.Services;
 using ThomasPool.Domain.Entities;
 using ThomasPool.Domain.Interfaces;
 using ThomasPool.Infra.Authentication;
+using ThomasPool.Infra.ImageProcessing;
 using ThomasPool.Infra.Persistence;
 
 BsonSerializer.RegisterSerializer(typeof(JsonNode), JsonNodeSerializer.Instance);
@@ -49,6 +50,7 @@ builder.Services.AddTransient<IDbInitializer, MongoProfileFormInitializer>();
 
 builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+builder.Services.AddSingleton<IImageProcessor, SkiaSharpImageProcessor>();
 
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<ProfileService>();

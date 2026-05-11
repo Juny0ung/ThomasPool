@@ -11,11 +11,13 @@ public class ProfileService
     private readonly IProfileFormRepository _profileFormRepository;
     private readonly IProfileRepository _profileRepository;
     private readonly IPhotoRepository _photoRepository;
-    public ProfileService(IProfileFormRepository profileFormRepository, IProfileRepository profileRepository, IPhotoRepository photoRepository)
+    private readonly IImageProcessor _imageProcessor;
+    public ProfileService(IProfileFormRepository profileFormRepository, IProfileRepository profileRepository, IPhotoRepository photoRepository, IImageProcessor imageProcessor)
     {
         _profileFormRepository = profileFormRepository;
         _profileRepository = profileRepository;
         _photoRepository = photoRepository;
+        _imageProcessor = imageProcessor;
     }
 
     public async Task<Result> UpdateProfileFormAsync(ProfileForm profileForm)
@@ -71,7 +73,8 @@ public class ProfileService
             var prevProfile = await _profileRepository.GetInfoAsync(profile);
 
             string photoId = prevProfile?.PhotoId ?? Guid.NewGuid().ToString();
-            await _photoRepository.SavePhotoAsync(photoId, photo);
+            byte[] compressed = _imageProcessor.Compress(photo);
+            await _photoRepository.SavePhotoAsync(photoId, compressed);
             profile.PhotoId = photoId;
 
             if (prevProfile != null) await _profileRepository.UpdateInfoAsync(profile);
