@@ -67,7 +67,7 @@ public record ProfileBaseDto(
     public ProfileBase ToDomain() => new(Name, Gender, PhoneNumber, BirthYear, Region);
 }
 
-public record ProfileDto(
+public record ProfileRequest(
     [property: JsonPropertyName("name")]
     [Required, StringLength(100, MinimumLength = 1)]
     string Name,
@@ -97,14 +97,27 @@ public record ProfileDto(
         [.. Info.Select(c => c.ToDomain())],
         Version
     );
+}
 
-    public static ProfileDto FromDomain(Profile profile) => new(
+public record ProfileResponse(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("gender")] bool Gender,
+    [property: JsonPropertyName("phoneNumber")] string PhoneNumber,
+    [property: JsonPropertyName("birthYear")] int BirthYear,
+    [property: JsonPropertyName("region")] string Region,
+    [property: JsonPropertyName("version")] int Version,
+    [property: JsonPropertyName("info")] ProfileContentDto[] Info,
+    [property: JsonPropertyName("photoId")] string PhotoId
+)
+{
+    public static ProfileResponse FromDomain(Profile profile) => new(
         profile.Name,
         profile.Gender,
         profile.PhoneNumber,
         profile.BirthYear,
         profile.Region,
         profile.Version,
-        [.. profile.Info.Select(ProfileContentDto.FromDomain)]
+        [.. profile.Info.Select(ProfileContentDto.FromDomain)],
+        profile.PhotoId!
     );
 }

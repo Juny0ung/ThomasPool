@@ -37,6 +37,11 @@ public static class Errors
         public static readonly Error Conflict = new ("pf_cf", "Version conflict, please retry", ErrorType.Conflict);
     }
 
+    public static class Photo
+    {
+        public static readonly Error NotFound = new("ph_nf", "Photo not found", ErrorType.NotFound);
+    }
+
     public static class General
     {
         public static readonly Error Unknown = new ("uk", "Unknown error", ErrorType.Failure);

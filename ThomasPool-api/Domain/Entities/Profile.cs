@@ -23,6 +23,8 @@ public class ProfileBase
     [Required, StringLength(100, MinimumLength = 1)]
     public required string Region { get; set; }
 
+    public string? PhotoId { get; set; }
+
     protected ProfileBase() {}
 
     [SetsRequiredMembers]

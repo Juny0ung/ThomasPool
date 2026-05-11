@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ThomasPool.Api.Dtos;
@@ -35,10 +35,25 @@ public class ProfileController : ApiControllerBase
     }
 
     [HttpPost("profile")]
-    public async Task<IActionResult> UpdateProfile(ProfileDto profileDto)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateProfile([FromForm] string profile, IFormFile photo)
     {
-        Result result = await _profileService.UpdateProfileAsync(profileDto.ToProfile());
+        var profileRequest = JsonSerializer.Deserialize<ProfileRequest>(profile);
+        if (profileRequest == null) return HandleFailure(Errors.Profile.Invalid);
+
+        using var ms = new MemoryStream();
+        await photo.CopyToAsync(ms);
+        byte[] photoBytes = ms.ToArray();
+
+        Result result = await _profileService.UpdateProfileAsync(profileRequest.ToProfile(), photoBytes);
         return result.IsSuccess ? Ok() : HandleFailure(result.Error);
+    }
+
+    [HttpGet("photo/{photoId}")]
+    public async Task<IActionResult> GetPhoto(string photoId)
+    {
+        Result<byte[]> result = await _profileService.GetPhotoAsync(photoId);
+        return result.IsSuccess ? File(result.Value, "image/jpeg") : HandleFailure(result.Error);
     }
 
     [Authorize(Roles = "Admin")]
@@ -46,6 +61,6 @@ public class ProfileController : ApiControllerBase
     public async Task<IActionResult> GetProfiles(string name, int skip, int limit)
     {
         Result<Profile[]> result = await _profileService.GetProfilesAsync(name, skip, limit);
-        return result.IsSuccess ? Ok(result.Value.Select(p => ProfileDto.FromDomain(p))) : HandleFailure(result.Error);
+        return result.IsSuccess ? Ok(result.Value.Select(ProfileResponse.FromDomain)) : HandleFailure(result.Error);
     }
 }

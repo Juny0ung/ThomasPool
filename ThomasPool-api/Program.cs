@@ -41,6 +41,7 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IAdminRepository, MongoAdminRepository>();
 builder.Services.AddScoped<IProfileRepository, MongoProfileRepository>();
 builder.Services.AddScoped<IProfileFormRepository, MongoProfileFormRepository>();
+builder.Services.AddScoped<IPhotoRepository, MongoPhotoRepository>();
 
 builder.Services.AddTransient<IDbInitializer, MongoAdminInitializer>();
 builder.Services.AddTransient<IDbInitializer, MongoProfileInitializer>();

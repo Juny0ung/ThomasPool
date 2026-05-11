@@ -10,10 +10,12 @@ public class ProfileService
 {
     private readonly IProfileFormRepository _profileFormRepository;
     private readonly IProfileRepository _profileRepository;
-    public ProfileService(IProfileFormRepository profileFormRepository, IProfileRepository profileRepository)
+    private readonly IPhotoRepository _photoRepository;
+    public ProfileService(IProfileFormRepository profileFormRepository, IProfileRepository profileRepository, IPhotoRepository photoRepository)
     {
         _profileFormRepository = profileFormRepository;
         _profileRepository = profileRepository;
+        _photoRepository = photoRepository;
     }
 
     public async Task<Result> UpdateProfileFormAsync(ProfileForm profileForm)
@@ -50,7 +52,7 @@ public class ProfileService
         }
     }
 
-    public async Task<Result> UpdateProfileAsync(Profile profile)
+    public async Task<Result> UpdateProfileAsync(Profile profile, byte[] photo)
     {
         try
         {
@@ -64,9 +66,14 @@ public class ProfileService
 
             if (!validForm.ValidateProfile(profile))
                 return Result.Failure(Errors.Profile.Invalid);
-            
+
             // TODO: validate password
             var prevProfile = await _profileRepository.GetInfoAsync(profile);
+
+            string photoId = prevProfile?.PhotoId ?? Guid.NewGuid().ToString();
+            await _photoRepository.SavePhotoAsync(photoId, photo);
+            profile.PhotoId = photoId;
+
             if (prevProfile != null) await _profileRepository.UpdateInfoAsync(profile);
             else await _profileRepository.SaveInfoAsync(profile);
 
@@ -79,6 +86,20 @@ public class ProfileService
         catch
         {
             return Result.Failure(Errors.General.Unknown);
+        }
+    }
+
+    public async Task<Result<byte[]>> GetPhotoAsync(string photoId)
+    {
+        try
+        {
+            var photo = await _photoRepository.GetPhotoAsync(photoId);
+            if (photo == null) return Result<byte[]>.Failure(Errors.Photo.NotFound);
+            return Result<byte[]>.Success(photo);
+        }
+        catch
+        {
+            return Result<byte[]>.Failure(Errors.General.Unknown);
         }
     }
 
