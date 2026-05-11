@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -13,23 +14,13 @@ using ThomasPool.Infra.Persistence;
 
 BsonSerializer.RegisterSerializer(typeof(JsonNode), JsonNodeSerializer.Instance);
 
-BsonClassMap.RegisterClassMap<Admin>(cm =>
-{
-    cm.AutoMap();
-    cm.SetIgnoreExtraElements(true);
-});
+var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+ConventionRegistry.Register("GlobalConventions", conventionPack, _ => true);
 
-BsonClassMap.RegisterClassMap<Profile>(cm =>
-{
-    cm.AutoMap();
-    cm.SetIgnoreExtraElements(true);
-});
-
-BsonClassMap.RegisterClassMap<ProfileForm>(cm =>
-{
-    cm.AutoMap();
-    cm.SetIgnoreExtraElements(true);
-});
+BsonClassMap.RegisterClassMap<ProfileContent>(cm => { cm.AutoMap(); cm.SetIsRootClass(true); });
+BsonClassMap.RegisterClassMap<SingleContent>();
+BsonClassMap.RegisterClassMap<MultipleContent>();
+BsonClassMap.RegisterClassMap<BoolContent>();
 
 var builder = WebApplication.CreateBuilder(args);
 
