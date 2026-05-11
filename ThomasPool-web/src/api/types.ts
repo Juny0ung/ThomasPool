@@ -45,7 +45,7 @@ export interface MultipleContentDto {
 
 export type ProfileContentDto = SingleContentDto | BoolContentDto | MultipleContentDto
 
-export interface ProfileDto {
+export interface ProfileRequest {
   name: string
   gender: boolean
   phoneNumber: string
@@ -53,4 +53,8 @@ export interface ProfileDto {
   region: string
   version: number
   info: ProfileContentDto[]
+}
+
+export interface ProfileResponse extends ProfileRequest {
+  photoId: string
 }

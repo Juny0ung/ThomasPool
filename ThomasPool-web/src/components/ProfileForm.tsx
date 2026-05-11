@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getProfileForm, submitProfile } from '../api/profileApi'
 import { QuestionType } from '../api/types'
 import type { AnyQuestion, ProfileContentDto, ProfileFormResponse } from '../api/types'
+import { useRef } from 'react'
 
 interface FixedFields {
   name: string
@@ -169,6 +170,10 @@ export default function ProfileForm() {
     region: '',
   })
   const [answers, setAnswers] = useState<Record<number, Answer>>({})
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoMissing, setPhotoMissing] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getProfileForm()
@@ -181,20 +186,34 @@ export default function ProfileForm() {
     setAnswers((prev) => ({ ...prev, [index]: value }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null
+    setPhoto(file)
+    setPhotoPreview(file ? URL.createObjectURL(file) : null)
+    if (file) setPhotoMissing(false)
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!photo) {
+      setPhotoMissing(true)
+      return
+    }
     setSubmitting(true)
     setSubmitError(null)
     try {
-      await submitProfile({
-        name: fixed.name,
-        gender: fixed.gender === 'true',
-        phoneNumber: fixed.phoneNumber,
-        birthYear: parseInt(fixed.birthYear),
-        region: fixed.region,
-        version: form?.version ?? 0,
-        info: form ? buildInfo(form.questions, answers) : [],
-      })
+      await submitProfile(
+        {
+          name: fixed.name,
+          gender: fixed.gender === 'true',
+          phoneNumber: fixed.phoneNumber,
+          birthYear: parseInt(fixed.birthYear),
+          region: fixed.region,
+          version: form?.version ?? 0,
+          info: form ? buildInfo(form.questions, answers) : [],
+        },
+        photo,
+      )
       setSuccess(true)
     } catch {
       setSubmitError('제출에 실패했습니다. 다시 시도해주세요.')
@@ -307,6 +326,30 @@ export default function ProfileForm() {
                 onChange={(e) => setFixed((p) => ({ ...p, region: e.target.value }))}
                 placeholder="서울"
                 required
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>사진</label>
+              <div
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-6 transition hover:border-indigo-300 hover:bg-indigo-50 ${photoMissing ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'}`}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {photoPreview ? (
+                  <img src={photoPreview} alt="미리보기" className="h-32 w-32 rounded-full object-cover" />
+                ) : (
+                  <>
+                    <span className="text-2xl text-gray-300">📷</span>
+                    <p className={`mt-2 text-sm ${photoMissing ? 'text-red-400' : 'text-gray-400'}`}>클릭하여 사진 업로드</p>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoChange}
               />
             </div>
           </div>

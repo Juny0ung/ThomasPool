@@ -1,4 +1,4 @@
-import type { AnyQuestion, ProfileDto, ProfileFormResponse } from './types'
+import type { AnyQuestion, ProfileRequest, ProfileResponse, ProfileFormResponse } from './types'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
@@ -8,13 +8,19 @@ export async function getProfileForm(): Promise<ProfileFormResponse> {
   return res.json()
 }
 
-export async function submitProfile(data: ProfileDto): Promise<void> {
+export async function submitProfile(data: ProfileRequest, photo: File): Promise<void> {
+  const formData = new FormData()
+  formData.append('profile', JSON.stringify(data))
+  formData.append('photo', photo)
   const res = await fetch(`${BASE_URL}/api/profile/profile`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: formData,
   })
   if (!res.ok) throw new Error('Failed to submit profile')
+}
+
+export function getPhotoUrl(photoId: string): string {
+  return `${BASE_URL}/api/profile/photo/${photoId}`
 }
 
 export async function updateProfileForm(token: string, questions: AnyQuestion[]): Promise<void> {
@@ -31,7 +37,7 @@ export async function getProfiles(
   name: string,
   skip: number,
   limit: number,
-): Promise<ProfileDto[]> {
+): Promise<ProfileResponse[]> {
   const params = new URLSearchParams({ name, skip: String(skip), limit: String(limit) })
   const res = await fetch(`${BASE_URL}/api/profile/profiles?${params}`, {
     headers: { Authorization: `Bearer ${token}` },
