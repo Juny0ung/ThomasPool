@@ -11,13 +11,15 @@ public class ProfileServiceTests
     private readonly Mock<IProfileFormRepository> _formRepo = new();
     private readonly Mock<IProfileRepository> _profileRepo = new();
     private readonly Mock<IPhotoRepository> _photoRepo = new();
+    private readonly Mock<IImageProcessor> _imageProcessor = new();
     private readonly ProfileService _sut;
 
     private static readonly byte[] SamplePhoto = [0xFF, 0xD8, 0xFF];
+    private static readonly byte[] CompressedPhoto = [0xFF, 0xD8, 0x00];
 
     public ProfileServiceTests()
     {
-        _sut = new ProfileService(_formRepo.Object, _profileRepo.Object, _photoRepo.Object);
+        _sut = new ProfileService(_formRepo.Object, _profileRepo.Object, _photoRepo.Object, _imageProcessor.Object);
     }
 
     private static ProfileForm ValidForm(int version = 1) => new ProfileForm
@@ -162,7 +164,8 @@ public class ProfileServiceTests
         var form = ValidForm(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
         _profileRepo.Setup(x => x.GetInfoAsync(profile)).ReturnsAsync((Profile?)null);
-        _photoRepo.Setup(x => x.SavePhotoAsync(It.IsAny<string>(), SamplePhoto)).Returns(Task.CompletedTask);
+        _imageProcessor.Setup(x => x.Compress(SamplePhoto, 75)).Returns(CompressedPhoto);
+        _photoRepo.Setup(x => x.SavePhotoAsync(It.IsAny<string>(), CompressedPhoto)).Returns(Task.CompletedTask);
         _profileRepo.Setup(x => x.SaveInfoAsync(profile)).Returns(Task.CompletedTask);
 
         var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
@@ -170,7 +173,7 @@ public class ProfileServiceTests
         Assert.True(result.IsSuccess);
         _profileRepo.Verify(x => x.SaveInfoAsync(profile), Times.Once);
         _profileRepo.Verify(x => x.UpdateInfoAsync(It.IsAny<Profile>()), Times.Never);
-        _photoRepo.Verify(x => x.SavePhotoAsync(It.IsAny<string>(), SamplePhoto), Times.Once);
+        _photoRepo.Verify(x => x.SavePhotoAsync(It.IsAny<string>(), CompressedPhoto), Times.Once);
     }
 
     [Fact]
@@ -182,7 +185,8 @@ public class ProfileServiceTests
         var form = ValidForm(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
         _profileRepo.Setup(x => x.GetInfoAsync(profile)).ReturnsAsync(existing);
-        _photoRepo.Setup(x => x.SavePhotoAsync("existing-photo-id", SamplePhoto)).Returns(Task.CompletedTask);
+        _imageProcessor.Setup(x => x.Compress(SamplePhoto, 75)).Returns(CompressedPhoto);
+        _photoRepo.Setup(x => x.SavePhotoAsync("existing-photo-id", CompressedPhoto)).Returns(Task.CompletedTask);
         _profileRepo.Setup(x => x.UpdateInfoAsync(profile)).Returns(Task.CompletedTask);
 
         var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
@@ -191,7 +195,7 @@ public class ProfileServiceTests
         Assert.Equal("existing-photo-id", profile.PhotoId);
         _profileRepo.Verify(x => x.UpdateInfoAsync(profile), Times.Once);
         _profileRepo.Verify(x => x.SaveInfoAsync(It.IsAny<Profile>()), Times.Never);
-        _photoRepo.Verify(x => x.SavePhotoAsync("existing-photo-id", SamplePhoto), Times.Once);
+        _photoRepo.Verify(x => x.SavePhotoAsync("existing-photo-id", CompressedPhoto), Times.Once);
     }
 
     [Fact]
@@ -266,7 +270,8 @@ public class ProfileServiceTests
         var form = ValidForm(version: 1);
         _formRepo.Setup(x => x.GetFormAsync(1)).ReturnsAsync(form);
         _profileRepo.Setup(x => x.GetInfoAsync(profile)).ReturnsAsync((Profile?)null);
-        _photoRepo.Setup(x => x.SavePhotoAsync(It.IsAny<string>(), SamplePhoto)).Returns(Task.CompletedTask);
+        _imageProcessor.Setup(x => x.Compress(SamplePhoto, 75)).Returns(CompressedPhoto);
+        _photoRepo.Setup(x => x.SavePhotoAsync(It.IsAny<string>(), CompressedPhoto)).Returns(Task.CompletedTask);
         _profileRepo.Setup(x => x.SaveInfoAsync(profile)).ThrowsAsync(new InvalidOperationException());
 
         var result = await _sut.UpdateProfileAsync(profile, SamplePhoto);
