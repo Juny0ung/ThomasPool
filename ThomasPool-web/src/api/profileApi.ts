@@ -32,13 +32,24 @@ export async function updateProfileForm(token: string, questions: AnyQuestion[])
   if (!res.ok) throw new Error('폼 업데이트에 실패했습니다.')
 }
 
+export interface ProfileFilter {
+  name?: string[]
+  gender?: boolean[]
+  birthYear?: number[]
+  region?: string[]
+}
+
 export async function getProfiles(
   token: string,
-  name: string,
   skip: number,
   limit: number,
+  filter: ProfileFilter = {},
 ): Promise<ProfileResponse[]> {
-  const params = new URLSearchParams({ name, skip: String(skip), limit: String(limit) })
+  const params = new URLSearchParams({ skip: String(skip), limit: String(limit) })
+  filter.name?.forEach((v) => params.append('name', v))
+  filter.gender?.forEach((v) => params.append('gender', String(v)))
+  filter.birthYear?.forEach((v) => params.append('birthYear', String(v)))
+  filter.region?.forEach((v) => params.append('region', v))
   const res = await fetch(`${BASE_URL}/api/profile/profiles?${params}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
