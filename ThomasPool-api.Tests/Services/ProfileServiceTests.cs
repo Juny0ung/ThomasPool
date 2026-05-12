@@ -334,24 +334,38 @@ public class ProfileServiceTests
     #region GetProfilesAsync
 
     [Fact]
-    public async Task GetProfilesAsync_ReturnsProfiles()
+    public async Task GetProfilesAsync_WithNameFilter_ReturnsMatchingProfiles()
     {
         var profiles = new[] { ValidProfile(), ValidProfile() };
-        _profileRepo.Setup(x => x.GetInfosAsync("홍길동", 0, 10)).ReturnsAsync(profiles);
+        string[] names = ["홍길동"];
+        _profileRepo.Setup(x => x.GetInfosAsync(0, 10, names, null, null, null)).ReturnsAsync(profiles);
 
-        var result = await _sut.GetProfilesAsync("홍길동", 0, 10);
+        var result = await _sut.GetProfilesAsync(0, 10, name: names);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, result.Value.Length);
     }
 
     [Fact]
+    public async Task GetProfilesAsync_NoFilters_ReturnsAllProfiles()
+    {
+        var profiles = new[] { ValidProfile(), ValidProfile(), ValidProfile() };
+        _profileRepo.Setup(x => x.GetInfosAsync(0, 20, null, null, null, null)).ReturnsAsync(profiles);
+
+        var result = await _sut.GetProfilesAsync(0, 20);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(3, result.Value.Length);
+    }
+
+    [Fact]
     public async Task GetProfilesAsync_EmptyResult_ReturnsEmptyArray()
     {
-        _profileRepo.Setup(x => x.GetInfosAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+        _profileRepo.Setup(x => x.GetInfosAsync(It.IsAny<int>(), It.IsAny<int>(),
+                It.IsAny<string[]?>(), It.IsAny<bool[]?>(), It.IsAny<int[]?>(), It.IsAny<string[]?>()))
                     .ReturnsAsync([]);
 
-        var result = await _sut.GetProfilesAsync("없는사람", 0, 10);
+        var result = await _sut.GetProfilesAsync(0, 10, name: ["없는사람"]);
 
         Assert.True(result.IsSuccess);
         Assert.Empty(result.Value);
@@ -360,10 +374,11 @@ public class ProfileServiceTests
     [Fact]
     public async Task GetProfilesAsync_UnexpectedException_ReturnsUnknownError()
     {
-        _profileRepo.Setup(x => x.GetInfosAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+        _profileRepo.Setup(x => x.GetInfosAsync(It.IsAny<int>(), It.IsAny<int>(),
+                It.IsAny<string[]?>(), It.IsAny<bool[]?>(), It.IsAny<int[]?>(), It.IsAny<string[]?>()))
                     .ThrowsAsync(new Exception("db error"));
 
-        var result = await _sut.GetProfilesAsync("홍길동", 0, 10);
+        var result = await _sut.GetProfilesAsync(0, 10);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(Errors.General.Unknown, result.Error);
