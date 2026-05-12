@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getPhotoUrl, getProfiles } from '../../../api/profileApi'
 import type { ProfileFilter } from '../../../api/profileApi'
 import type { ProfileResponse } from '../../../api/types'
+import { UnauthorizedError } from '../../../api/errors'
 import { useAuth } from '../../../contexts/AuthContext'
 
 const PAGE_SIZE = 20
@@ -60,7 +61,7 @@ function DualRangeSlider({
 }
 
 export default function ProfilesPanel() {
-  const { token } = useAuth()
+  const { token, clearToken } = useAuth()
   const [nameInput, setNameInput] = useState('')
   const [regionInput, setRegionInput] = useState('')
   const [regionTags, setRegionTags] = useState<string[]>([])
@@ -100,6 +101,7 @@ export default function ProfilesPanel() {
       setSelected(null)
       setSearched(true)
     } catch (e) {
+      if (e instanceof UnauthorizedError) { clearToken(); return }
       setError(e instanceof Error ? e.message : '오류가 발생했습니다.')
     } finally {
       setLoading(false)

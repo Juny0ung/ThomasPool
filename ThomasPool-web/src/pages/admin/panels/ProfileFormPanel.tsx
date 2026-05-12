@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getProfileForm, updateProfileForm } from '../../../api/profileApi'
 import { QuestionType } from '../../../api/types'
 import type { AnyQuestion } from '../../../api/types'
+import { UnauthorizedError } from '../../../api/errors'
 import { useAuth } from '../../../contexts/AuthContext'
 
 const QUESTION_TYPE_LABELS: Record<number, string> = {
@@ -31,7 +32,7 @@ function toDto(q: EditableQuestion): AnyQuestion {
 }
 
 export default function ProfileFormPanel() {
-  const { token } = useAuth()
+  const { token, clearToken } = useAuth()
   const [questions, setQuestions] = useState<EditableQuestion[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -97,6 +98,7 @@ export default function ProfileFormPanel() {
       await updateProfileForm(token!, questions.map(toDto))
       setSuccess(true)
     } catch (err) {
+      if (err instanceof UnauthorizedError) { clearToken(); return }
       setError(err instanceof Error ? err.message : '오류가 발생했습니다.')
     } finally {
       setSubmitting(false)

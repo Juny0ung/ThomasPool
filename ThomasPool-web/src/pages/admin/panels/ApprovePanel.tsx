@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { approveAdmins, getPendingList } from '../../../api/adminApi'
 import type { AdminDto } from '../../../api/adminApi'
+import { UnauthorizedError } from '../../../api/errors'
 import { useAuth } from '../../../contexts/AuthContext'
 
 const PAGE_SIZE = 20
 
 export default function ApprovePanel() {
-  const { token } = useAuth()
+  const { token, clearToken } = useAuth()
   const [list, setList] = useState<AdminDto[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [skip, setSkip] = useState(0)
@@ -22,6 +23,7 @@ export default function ApprovePanel() {
       setSkip(offset)
       setSelected(new Set())
     } catch (e) {
+      if (e instanceof UnauthorizedError) { clearToken(); return }
       setError(e instanceof Error ? e.message : '오류가 발생했습니다.')
     } finally {
       setLoading(false)
@@ -46,6 +48,7 @@ export default function ApprovePanel() {
       await approveAdmins(token!, [...selected])
       await fetchList(skip)
     } catch (e) {
+      if (e instanceof UnauthorizedError) { clearToken(); return }
       setError(e instanceof Error ? e.message : '오류가 발생했습니다.')
       setLoading(false)
     }

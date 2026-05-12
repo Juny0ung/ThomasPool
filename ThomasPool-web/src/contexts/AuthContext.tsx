@@ -2,6 +2,15 @@ import { createContext, useContext, useState } from 'react'
 
 const TOKEN_KEY = 'admin_token'
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
+
 interface AuthContextValue {
   token: string | null
   saveToken: (token: string) => void
@@ -11,7 +20,14 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY))
+  const [token, setToken] = useState<string | null>(() => {
+    const stored = localStorage.getItem(TOKEN_KEY)
+    if (stored && isTokenExpired(stored)) {
+      localStorage.removeItem(TOKEN_KEY)
+      return null
+    }
+    return stored
+  })
 
   function saveToken(t: string) {
     localStorage.setItem(TOKEN_KEY, t)

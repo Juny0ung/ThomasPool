@@ -1,4 +1,5 @@
 import type { AnyQuestion, ProfileRequest, ProfileResponse, ProfileFormResponse } from './types'
+import { assertOk } from './errors'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
@@ -29,7 +30,7 @@ export async function updateProfileForm(token: string, questions: AnyQuestion[])
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ questions }),
   })
-  if (!res.ok) throw new Error('폼 업데이트에 실패했습니다.')
+  assertOk(res)
 }
 
 export interface ProfileFilter {
@@ -53,6 +54,6 @@ export async function getProfiles(
   const res = await fetch(`${BASE_URL}/api/profile/profiles?${params}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) throw new Error('프로필 목록을 불러오는데 실패했습니다.')
+  assertOk(res)
   return res.json()
 }
