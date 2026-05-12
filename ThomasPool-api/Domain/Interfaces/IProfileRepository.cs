@@ -10,5 +10,5 @@ public interface IProfileRepository
     Task UpdateInfoAsync(Profile profile);
     Task DeleteProfileAsync(ProfileBase profileBase);
     Task<Profile?> GetInfoAsync(ProfileBase profileBase);
-    Task<Profile[]> GetInfosAsync(string name, int skip = 0, int limit = 20);
+    Task<Profile[]> GetInfosAsync(int skip = 0, int limit = 20, string[]? name = null, bool[]? gender = null, int[]? birthYear = null, string[]? region = null);
 }

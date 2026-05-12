@@ -106,11 +106,11 @@ public class ProfileService
         }
     }
 
-    public async Task<Result<Profile[]>> GetProfilesAsync(string name, int skip, int limit)
+    public async Task<Result<Profile[]>> GetProfilesAsync(int skip, int limit, string[]? name = null, bool[]? gender = null, int[]? birthYear = null, string[]? region = null)
     {
         try
         {
-            Profile[] profiles = await _profileRepository.GetInfosAsync(name, skip, limit);
+            Profile[] profiles = await _profileRepository.GetInfosAsync(skip, limit, name, gender, birthYear, region);
             return Result<Profile[]>.Success(profiles);
         }
         catch

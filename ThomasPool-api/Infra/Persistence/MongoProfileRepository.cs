@@ -59,13 +59,19 @@ public class MongoProfileRepository : IProfileRepository
         return result;
     }
 
-    public async Task<Profile[]> GetInfosAsync(string name, int skip = 0, int limit = 20)
+    public async Task<Profile[]> GetInfosAsync(int skip = 0, int limit = 20, string[]? name = null, bool[]? gender = null, int[]? birthYear = null, string[]? region = null)
     {
-        var profiles = await _profiles.Find(p => p.Name == name)
+        var filter = Builders<Profile>.Filter.Empty;
+        if (name is { Length: > 0 })      filter &= Builders<Profile>.Filter.In(p => p.Name, name);
+        if (gender is { Length: > 0 })    filter &= Builders<Profile>.Filter.In(p => p.Gender, gender);
+        if (birthYear is { Length: > 0 }) filter &= Builders<Profile>.Filter.In(p => p.BirthYear, birthYear);
+        if (region is { Length: > 0 })    filter &= Builders<Profile>.Filter.In(p => p.Region, region);
+
+        var profiles = await _profiles.Find(filter)
             .Skip(skip)
             .Limit(limit)
             .ToListAsync();
-        _logger.LogInformation($"Found {profiles.Count()} profiles for {name}");
+        _logger.LogInformation("Found {Count} profiles", profiles.Count);
         return [.. profiles];
     }
 }

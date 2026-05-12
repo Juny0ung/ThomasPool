@@ -60,9 +60,9 @@ public class ProfileController : ApiControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpGet("profiles")]
-    public async Task<IActionResult> GetProfiles(string name, int skip, int limit)
+    public async Task<IActionResult> GetProfiles(int skip, int limit, [FromQuery] string[]? name = null, [FromQuery] bool[]? gender = null, [FromQuery] int[]? birthYear = null, [FromQuery] string[]? region = null)
     {
-        Result<Profile[]> result = await _profileService.GetProfilesAsync(name, skip, limit);
+        Result<Profile[]> result = await _profileService.GetProfilesAsync(skip, limit, name, gender, birthYear, region);
         return result.IsSuccess ? Ok(result.Value.Select(ProfileResponse.FromDomain)) : HandleFailure(result.Error);
     }
 }
